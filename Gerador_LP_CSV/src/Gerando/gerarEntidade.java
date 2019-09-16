@@ -29,6 +29,8 @@ public class gerarEntidade {
         String set = "set";
 
         codigo.add("package Main;\n"
+                + "\n "
+                + "\nimport java.util.Date;\n"
                 + "public class " + nomeDaClasse + " \n {");
         for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");

@@ -11,6 +11,7 @@ public class Main {
         new GerarGUI();
         new GerarDateTextField();
         new GerarManipulaArquivo();
+        new gerarMain();
     }
 
 }

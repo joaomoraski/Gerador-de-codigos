@@ -27,6 +27,7 @@ public class GerarGUI {
 
         //primeira letra maiscula
         String pk = "Id"; //indique qual atributo é chave primaria 
+        String pkt = "int"; //indique qual é o tipo da váriavel pk 
         String get = "get";
         String set = "set";
 
@@ -114,6 +115,7 @@ public class GerarGUI {
         codigo.add("private " + nomeDaClasse + " " + nomeDaClasseminusculo + "Entidade"
                 + " = new " + nomeDaClasse + "();\n\n");
 
+        //colunas e dados do negocio la
         int c = 0;
         String a = " ";
         for (int i = 0; i < atributo.size(); i++) {
@@ -134,6 +136,7 @@ public class GerarGUI {
                 + "private JPanel painel2 = new JPanel(new GridLayout(1,1));\n"
                 + "\nprivate CardLayout cardLayout;\n \n");
 
+        //gerando construtor e passando caminho pra onde vai os dados
         codigo.add("\npublic " + nomeDaClasse + "GUI() {\n"
                 + "\nString caminhoENomeDoArquivo = "
                 + "\"C:/Users/jvmor/Documents/NetBeansProjects/Cobaia/src/Dados" + nomeDaClasse + ".csv\";\n"
@@ -161,6 +164,7 @@ public class GerarGUI {
                 + "painelNorte.add(toolBar);\n \n"
                 + "painelCentro.setLayout(new GridLayout(" + (atributo.size() - 1) + ",2));\n \n");
 
+        //adicionando no layout
         for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
             if (!aux[0].equals("boolean") || !aux[0].equals("DateTextField") || !aux[0].equals("Date")) {
@@ -202,12 +206,15 @@ public class GerarGUI {
                 + "btCancelar.setVisible(false);\n \n"
         );
 
-        for (int i = 0; i < atributo.size(); i++) {
+        codigo.add("tf" + primeiraLetramaiscula(atributo.get(0).split(";")[1]) + ".setEditable(true);\n");
+
+        for (int i = 1; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
             codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
         }
         codigo.add("texto.setEditable(false);\n\n");
 
+        //primeiro listener
         codigo.add("btCarregarDados.addActionListener(new ActionListener(){\n"
                 + "@Override\n"
                 + "public void actionPerformed(ActionEvent e){\n"
@@ -245,18 +252,329 @@ public class GerarGUI {
             as = as.substring(0, as.length() - 2);
         }
         codigo.add(as + ");\n"
-        + nomeDaClasseminusculo + "Controle.adicionar(ce);\n}\n \n"
-        + "cardLayout.show(painelSul, \"Listagem\");}\n}\n});");
+                + nomeDaClasseminusculo + "Controle.adicionar(ce);\n}\n \n"
+                + "cardLayout.show(painelSul, \"Listagem\");}\n}\n});\n\n");
 
+        //botao gravar
+        codigo.add("btGravar.addActionListener(new ActionListener() {\n"
+                + "@Override\n"
+                + "public void actionPerformed(ActionEvent e){\n"
+                + "List<" + nomeDaClasse + "> lista" + nomeDaClasse + " = " + nomeDaClasseminusculo + "Controle.listar();\n"
+                + "List<String> lista" + nomeDaClasse + "EmFormatoStringCSV = new ArrayList<>();\n"
+                + "for (" + nomeDaClasse + " ce : lista" + nomeDaClasse + ") {\n"
+                + "lista" + nomeDaClasse + "EmFormatoStringCSV.add(ce.toString());\n"
+                + "}\n"
+                + "new ManipulaArquivo().salvarArquivo(caminhoENomeDoArquivo, "
+                + "lista" + nomeDaClasse + "EmFormatoStringCSV);\n"
+                + "System.out.println(\"gravou\");\n"
+                + "}\n"
+                + "});\n");
 
+        //botao buscar
+        codigo.add("btBuscar.addActionListener(new ActionListener() {\n"
+                + "@Override\n"
+                + "public void actionPerformed(ActionEvent e) {\n"
+                + "btAdicionar.setVisible(false);"
+                + "cardLayout.show(painelSul, \"Avisos\");\n"
+                + "scrollTexto.setViewportView(texto);\n"
+                + "if (tf" + pk + ".getText().trim().isEmpty()){\n"
+                + "JOptionPane.showMessageDialog(cp, \"" + pk + " deve ser preenchido\");\n"
+                + "tf" + pk + ".requestFocus();\n"
+                + "tf" + pk + ".selectAll();\n"
+                + "} else {"
+                + "chavePrimaria = tf" + pk + ".getText();\n"
+                + nomeDaClasseminusculo + "Entidade" + " = " + nomeDaClasseminusculo + "Controle.buscar(");
+        if ((pkt.equals("int")) || (pkt.equals("Int"))) {
+            codigo.add("Integer.valueOf(");
+        } else if (pkt.equals("Double") || (pkt.equals("double"))) {
+            codigo.add("Double.valueOf(");
+        } else if (pkt.equals("Boolean") || (pkt.equals("boolean"))) {
+            codigo.add("Boolean.valueOf(");
+        }
+
+        codigo.add("tf" + pk + ".getText()));\n"
+                + "if (" + nomeDaClasseminusculo + "Entidade" + "== null) {\n"
+                + "btAdicionar.setVisible(true);\n"
+                + "btAlterar.setVisible(false);\n"
+                + "btExcluir.setVisible(false);\n");
+        for (int i = 0; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            if (aux[0].equals("boolean")) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+            } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+                //codigo.add("SimpleDateFormat sdf = new SimpleDateFormat(\"dd/MM/yyyy\");\n");
+            } else if (!aux[0].equals("boolean") || !aux[0].equals("DateTextField") || !aux[0].equals("Date")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            }
+        }
+        codigo.add("texto.setText(\"Não encontrou na lista - pode Adicionar\\n\\n\\n\");\n"
+                + "}\n"
+                + "else "
+                + "{\n");
+        for (int i = 1; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            if (aux[0].equals("boolean")) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(" + nomeDaClasseminusculo + "Entidade" + ".is" + aux[1] + "));\n");
+            } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(String.valueOf(" + nomeDaClasseminusculo + "Entidade" + ".get" + primeiraLetramaiscula(aux[1])
+                        + "()" + "));\n");
+                //codigo.add("SimpleDateFormat sdf = new SimpleDateFormat(\"dd/MM/yyyy\");\n");
+            } else if (aux[0].equals("double") || aux[0].equals("Double")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(String.valueOf(" + nomeDaClasseminusculo + "Entidade"
+                        + ".get" + primeiraLetramaiscula(aux[1]) + "()));\n");
+            } else if (aux[0].equals("int") || aux[0].equals("Int")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(String.valueOf(" + nomeDaClasseminusculo + "Entidade"
+                        + ".get" + primeiraLetramaiscula(aux[1]) + "()));\n");
+            } else {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText("
+                        + nomeDaClasseminusculo + "Entidade.get" + primeiraLetramaiscula(aux[1]) + "());");
+            }
+        }
+        codigo.add("\n"
+                + "btAlterar.setVisible(true);\n"
+                + "btExcluir.setVisible(true);\n"
+                + "texto.setText(\"Encontrou na Lista - pode Alterar ou Excluir\\n\\n\\n\");\n");
+        for (int i = 1; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);");
+        }
+
+        codigo.add("}}}});");
+
+        //botão adicionar
+        codigo.add("\nbtAdicionar.addActionListener(new ActionListener() {\n"
+                + "@Override\n"
+                + "public void actionPerformed(ActionEvent e) {\n"
+                + "acao = \"adicionar\";\n"
+                + "tf" + pk + ".setText(chavePrimaria);\n"
+                + "tf" + pk + ".setEditable(false);\n"
+                + "tf" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + ".requestFocus();\n"
+                + "btSalvar.setVisible(true);\n"
+                + "btCancelar.setVisible(true);\n"
+                + "btBuscar.setVisible(false);\n"
+                + "btListar.setVisible(false);\n"
+                + "btAlterar.setVisible(false);\n"
+                + "btExcluir.setVisible(false);\n"
+                + "\n"
+                + "btAdicionar.setVisible(false);\n"
+                + "texto.setText(\"Preencha os atributos\\n\\n\\n\\n\\n\");//limpa o campo texto\n");
+        for (int i = 1; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);");
+            }
+        }
+        codigo.add("}});");
+
+        //botão alterar
+        codigo.add("btAlterar.addActionListener(new ActionListener() {\n"
+                + "@Override\n"
+                + "public void actionPerformed(ActionEvent e) {\n"
+                + "acao = \"alterar\";\n"
+                + "tf" + pk + ".setText(chavePrimaria);\n"
+                + "tf" + pk + ".setEditable(false);\n"
+                + "tf" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + ".requestFocus();\n"
+                + "btSalvar.setVisible(true);\n"
+                + "btCancelar.setVisible(true);\n"
+                + "btBuscar.setVisible(false);\n"
+                + "btListar.setVisible(false);\n"
+                + "btAlterar.setVisible(false);\n"
+                + "btExcluir.setVisible(false);\n"
+                + "texto.setText(\"Preencha os atributos\\n\\n\\n\\n\\n\");\n");
+        for (int i = 1; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);");
+            }
+        }
+        codigo.add("}\n"
+                + "});\n");
+
+        codigo.add("btCancelar.addActionListener(new ActionListener() {\n"
+                + "@Override\n"
+                + "public void actionPerformed(ActionEvent e) {\n"
+                + "btSalvar.setVisible(false);\n"
+                + "btCancelar.setVisible(false);\n"
+                + "btBuscar.setVisible(true);\n"
+                + "btListar.setVisible(true);\n"
+                + "tf" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + ".setEditable(true);\n");
+        for (int i = 0; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+            }
+        }
+        codigo.add("tf" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + ".requestFocus();\n"
+                + "tf" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + ".selectAll();\n"
+                + "texto.setText(\"Cancelou\\n\\n\\n\\n\\n\");\n");
+        for (int i = 1; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(false);");
+            }
+        }
+        codigo.add("}\n"
+                + "});");
+
+        //botão salvar
+        codigo.add("btSalvar.addActionListener(new ActionListener() {\n"
+                + "@Override\n"
+                + "public void actionPerformed(ActionEvent e) {\n"
+                + "if (acao.equals(\"alterar\")) {\n"
+                + nomeDaClasse + " " + nomeDaClasseminusculo + "Antigo = " + nomeDaClasseminusculo + "Entidade" + ";\n");
+
+        for (int i = 1; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            if (aux[0].equals("String") || (aux[0].equals("string"))) {
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(tf" + primeiraLetramaiscula(aux[1]) + ".getText());\n");
+            } else if (aux[0].equals("Double") || (aux[0].equals("double"))) {
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(Double.valueOf(tf" + primeiraLetramaiscula(aux[1]) + ".getText()));\n");
+            } else if (aux[0].equals("Boolean") || (aux[0].equals("boolean"))) {
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(cb" + primeiraLetramaiscula(aux[1]) + ".isSelected());\n");
+            }
+        }
+        codigo.add(nomeDaClasseminusculo + "Controle.alterar(" + nomeDaClasseminusculo + "Entidade" + ", " + nomeDaClasseminusculo + "Antigo);\n"
+                + "texto.setText(\"Registro alterado\\n\\n\\n\\n\\n\");\n"
+                + "} else {//adicionar\n"
+                + nomeDaClasseminusculo + "Entidade" + " = new " + nomeDaClasse + "();\n");
+        for (int i = 0; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            if (aux[1].equals(pk)) {
+                if (aux[0].equals("int")) {
+                    codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + pk + "(Integer.valueOf((tf" + pk + ".getText())));\n");
+                } else {
+                    codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + pk + "(tf" + pk + ".getText());\n");
+                }
+            } else if (aux[0].equals("String") || (aux[0].equals("string"))) {
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(tf" + primeiraLetramaiscula(aux[1]) + ".getText());\n");
+            } else if (aux[0].equals("Double") || (aux[0].equals("double"))) {
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(Double.valueOf((tf" + primeiraLetramaiscula(aux[1]) + ".getText())));\n");
+            } else if (aux[0].equals("Int") || (aux[0].equals("int"))) {
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(Integer.valueOf((tf" + primeiraLetramaiscula(aux[1]) + ".getText())));\n");
+            } else if (aux[0].equals("Boolean") || (aux[0].equals("boolean"))) {
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(cb" + primeiraLetramaiscula(aux[1]) + ".isSelected());\n");
+            }
+        }
+        codigo.add(nomeDaClasseminusculo + "Controle.adicionar(" + nomeDaClasseminusculo + "Entidade" + ");\n"
+                + "texto.setText(\"Foi adicionado um novo registro\\n\\n\\n\\n\\n\");}\n"
+                + "btSalvar.setVisible(false);\n"
+                + "btCancelar.setVisible(false);\n"
+                + "btBuscar.setVisible(true);\n"
+                + "btListar.setVisible(true);\n"
+                + "tf" + pk + ".setEditable(true);\n");
+        for (int i = 0; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+            }
+        }
+        codigo.add("tf" + pk + ".requestFocus();\n"
+                + "tf" + pk + ".selectAll();\n");
+        for (int i = 1; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);");
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);");
+            }
+        }
+        codigo.add("}\n"
+                + "\n"
+                + "});");
+
+        codigo.add("btExcluir.addActionListener(new ActionListener() {\n"
+                + "@Override\n"
+                + "public void actionPerformed(ActionEvent e) {\n"
+                + "tf" + pk + ".setText(chavePrimaria);//para retornar ao valor original (caso o usuário mude e tente enganar o programa)\n"
+                + "if (JOptionPane.YES_OPTION\n"
+                + "== JOptionPane.showConfirmDialog(null,\n"
+                + "\"Confirma a exclusão do registro <Nome = \" + " + nomeDaClasseminusculo + "Entidade" + ".get" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + "() +  \">?\", \"Confirm\",\n"
+                + "JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {\n"
+                + nomeDaClasseminusculo + "Controle.excluir(" + nomeDaClasseminusculo + "Entidade" + ");\n"
+                + "}\n"
+                + "btBuscar.setVisible(true);\n"
+                + "btListar.setVisible(true);\n"
+                + "tf" + pk + ".setEditable(true);\n");
+        for (int i = 1; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);");
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);");
+            }
+        }
+
+        codigo.add("tf" + pk + ".requestFocus();\n"
+                + "tf" + pk + ".selectAll();\n"
+                + "btExcluir.setVisible(false);\n"
+                + "btAlterar.setVisible(false);\n"
+                + "texto.setText(\"Excluiu o registro de \" + " + nomeDaClasseminusculo + "Entidade" + ".get" + pk + "() + \" - \" + "
+                + nomeDaClasseminusculo + "Entidade" + ".get" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + "() + \"\\n\\n\\n\\n\\n\");//limpa o campo texto\n"
+                + "}\n"
+                + "});"
+        );
+
+        codigo.add("btListar.addActionListener(new ActionListener() {\n"
+                + "            @Override\n"
+                + "            public void actionPerformed(ActionEvent e) {\n"
+                + "                List<" + nomeDaClasse + "> lt = " + nomeDaClasseminusculo + "Controle.listar();\n");
+        codigo.add("String[] colunas = new String[]{" + a + "};"
+                + "\n"
+                + "                Object[][] dados = new Object[lt.size()][colunas.length];\n"
+                + "                String aux[];\n"
+                + "                for (int i = 0; i < lt.size(); i++) {\n"
+                + "                    aux = lt.get(i).toString().split(\";\");\n"
+                + "                    for (int j = 0; j < colunas.length; j++) {\n"
+                + "                        dados[i][j] = aux[j];\n"
+                + "                    }\n"
+                + "                }\n"
+                + "                cardLayout.show(painelSul, \"Listagem\");\n"
+                + "                scrollTabela.setPreferredSize(tabela.getPreferredSize());\n"
+                + "                painel2.add(scrollTabela);\n"
+                + "                scrollTabela.setViewportView(tabela);\n"
+                + "                model.setDataVector(dados, colunas);\n"
+                + "\n"
+                + "                btAlterar.setVisible(false);\n"
+                + "                btExcluir.setVisible(false);\n"
+                + "                btAdicionar.setVisible(false);\n"
+                + "            }\n"
+                + "        });\n"
+                + "");
+
+        codigo.add("addWindowListener(new WindowAdapter() {\n"
+                + "            @Override\n"
+                + "            public void windowClosing(WindowEvent e) {\n"
+                + "                //antes de sair, salvar a lista em disco\n"
+                + "                btGravar.doClick();\n"
+                + "                // Sai da classe\n"
+                + "                dispose();\n"
+                + "            }\n"
+                + "        });\n"
+                + "\n"
+                + "        setVisible(true);   \n"
+                + "\n"
+                + "        //depois que a tela ficou visível, clic o botão automaticamente.\n"
+                + "        btCarregarDados.doClick();//execute o listener do btCarregarDados\n");
+
+        /* */
 //finaliza codigo
         codigo.add("}");
-        codigo.add("}");
-        for (int i = 0; i < codigo.size(); i++) {
+        codigo.add(
+                "}");
+        for (int i = 0;
+                i < codigo.size();
+                i++) {
             System.out.println(codigo.get(i));
         }
 
         ManipulaArquivo manipulaArquivo = new ManipulaArquivo();
+
         manipulaArquivo.salvarArquivo("C:/Users/jvmor/Documents/NetBeansProjects/Cobaia/src/Main/AtletaGUI.java", codigo);
 
     }
