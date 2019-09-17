@@ -7,6 +7,7 @@ import tools.ManipulaArquivo;
 public class gerarMain {
 
     String nomeDaClasse = "Main";
+    String nomeDaClasseGUI = "Trabalhador";
     String nomeDaClasseminusculo = "atleta";
     List<String> atributo = new ArrayList<>();
     List<String> codigo = new ArrayList<>();
@@ -22,7 +23,7 @@ public class gerarMain {
                 + "public class Main {\n"
                 + "\n"
                 + "    public static void main(String[] args) {\n"
-                + "        new AtletaGUI();\n"
+                + "        new "+ nomeDaClasseGUI +"GUI();\n"
                 + "    }\n"
                 + "    \n"
                 + "}");

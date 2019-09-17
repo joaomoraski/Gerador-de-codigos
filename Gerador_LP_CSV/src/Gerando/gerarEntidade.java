@@ -7,8 +7,8 @@ import tools.ManipulaArquivo;
 
 public class gerarEntidade {
     
-    String nomeDaClasse = "Atleta";
-    String nomeDaClasseminusculo = "atleta";
+    String nomeDaClasse = "Trabalhador";
+    String nomeDaClasseminusculo = "trabalhador";
     List<String> atributo = new ArrayList<>();
     List<String> codigo = new ArrayList<>();
     List<String> codigocontrole = new ArrayList<>();
@@ -19,11 +19,10 @@ public class gerarEntidade {
     
     public gerarEntidade(){
         //Gerando a classe
-        atributo.add("int;id");
+        atributo.add("String;cpf");
         atributo.add("String;nome");
-        atributo.add("double;altura");
-        atributo.add("String;esporte");
-        atributo.add("double;peso");
+        atributo.add("double;salario");
+        atributo.add("boolean;aposentado");
 
         String get = "get";
         String set = "set";
@@ -42,7 +41,7 @@ public class gerarEntidade {
                 + "    }\n");
 
        
-        String a = "public "+nomeDaClasse + " (";
+        String a = "public " + nomeDaClasse + " (";
         for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
             String c = aux[0] + " " + aux[1] + ", ";
@@ -52,15 +51,25 @@ public class gerarEntidade {
         a=a.substring(0,a.length()-2);
         codigo.add(a+") { ");
         
-        codigo.add(""
+        
+        for (int i = 0; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            codigo.add("this." + aux[1] + "= " + aux[1] + ";\n");
+        
+        }
+        codigo.add("}\n\n");
+        /*codigo.add(""
                 + "this.id = id;\n" 
                 + "this.nome = nome;\n" 
                 + "this.altura = altura;\n"
                 + "this.esporte = esporte;\n" 
                 + "}\n");        
-
+*/
         for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
+            if (aux[0].equals("boolean") || aux[0].equals("Boolean")) {
+                codigo.add("public "+ aux[0] + " is"+ primeiraLetramaiscula(aux[1])+"(){\nreturn "+aux[1]+";\n }");
+            }
             codigo.add("public "+aux[0] +" get"+primeiraLetramaiscula(aux[1])+"(){\nreturn "+aux[1]+";\n }");
             codigo.add("public void"
                     +" set"

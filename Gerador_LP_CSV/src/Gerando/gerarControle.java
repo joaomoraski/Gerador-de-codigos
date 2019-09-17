@@ -7,8 +7,8 @@ import tools.ManipulaArquivo;
 
 public class gerarControle {
     
-    String nomeDaClasse = "Atleta";
-    String nomeDaClasseminusculo = "atleta";
+    String nomeDaClasse = "Trabalhador";
+    String nomeDaClasseminusculo = "trabalhador";
     List<String> atributo = new ArrayList<>();
     List<String> codigo = new ArrayList<>();
     
@@ -18,11 +18,10 @@ public class gerarControle {
     
     public gerarControle(){
         //Gerando a classe
-        atributo.add("int;id");
+        atributo.add("String;cpf");
         atributo.add("String;nome");
-        atributo.add("double;altura");
-        atributo.add("String;esporte");
-        atributo.add("double;peso");
+        atributo.add("double;salario");
+        atributo.add("boolean;aposentado");
 
         String get = "get";
         String set = "set";
@@ -36,7 +35,7 @@ public class gerarControle {
                 + "\n "
                 + ""
                 + "List<"+nomeDaClasse+"> lista = new ArrayList<>();\n"
-                + "public AtletaControle(){ \n}"
+                + "public "+ nomeDaClasse +"Controle(){ \n}"
                 );
         
         codigo.add("public void limparLista(){"

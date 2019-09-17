@@ -6,8 +6,8 @@ import tools.ManipulaArquivo;
 
 public class GerarGUI {
 
-    String nomeDaClasse = "Atleta";
-    String nomeDaClasseminusculo = "atleta";
+    String nomeDaClasse = "Trabalhador";
+    String nomeDaClasseminusculo = "trabalhador";
     List<String> atributo = new ArrayList<>();
     List<String> codigo = new ArrayList<>();
     List<String> codigocontrole = new ArrayList<>();
@@ -17,17 +17,17 @@ public class GerarGUI {
     }
 
     public GerarGUI() {
-        atributo.add("int;id");
+        atributo.add("String;cpf");
         atributo.add("String;nome");
-        atributo.add("double;altura");
-        atributo.add("String;esporte");
-        atributo.add("double;peso");
+        atributo.add("double;salario");
+        atributo.add("boolean;aposentado");
+
         //atributo.add("boolean;aposentado");
         //atributo.add("Date;data");
 
         //primeira letra maiscula
-        String pk = "Id"; //indique qual atributo é chave primaria 
-        String pkt = "int"; //indique qual é o tipo da váriavel pk 
+        String pk = "Cpf"; //indique qual atributo é chave primaria 
+        String pkt = "String"; //indique qual é o tipo da váriavel pk 
         String get = "get";
         String set = "set";
 
@@ -165,11 +165,13 @@ public class GerarGUI {
                 + "painelCentro.setLayout(new GridLayout(" + (atributo.size() - 1) + ",2));\n \n");
 
         //adicionando no layout
-        for (int i = 0; i < atributo.size(); i++) {
+        for (int i = 1; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
             if (!aux[0].equals("boolean") || !aux[0].equals("DateTextField") || !aux[0].equals("Date")) {
                 if (aux[1].equals(pk)) {
                     codigo.add("//EASTER EGG UHULL");
+                } else if (aux[0].equals("boolean")){
+                    codigo.add("painelCentro.add(cb" + primeiraLetramaiscula(aux[1]) + ");\n");
                 } else {
                     codigo.add("painelCentro.add(lb" + primeiraLetramaiscula(aux[1]) + ");\n");
                     codigo.add("painelCentro.add(tf" + primeiraLetramaiscula(aux[1]) + ");\n");
@@ -205,13 +207,21 @@ public class GerarGUI {
                 + "btSalvar.setVisible(false);\n"
                 + "btCancelar.setVisible(false);\n \n"
         );
+        for (int i = 1; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date") ) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(false);\n");
 
-        codigo.add("tf" + primeiraLetramaiscula(atributo.get(0).split(";")[1]) + ".setEditable(true);\n");
-
+            }
+        }
+/*
         for (int i = 1; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
             codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
-        }
+        }*/
         codigo.add("texto.setEditable(false);\n\n");
 
         //primeiro listener
@@ -292,7 +302,7 @@ public class GerarGUI {
             codigo.add("Boolean.valueOf(");
         }
 
-        codigo.add("tf" + pk + ".getText()));\n"
+        codigo.add("tf" + pk + ".getText());\n"
                 + "if (" + nomeDaClasseminusculo + "Entidade" + "== null) {\n"
                 + "btAdicionar.setVisible(true);\n"
                 + "btAlterar.setVisible(false);\n"
@@ -315,7 +325,7 @@ public class GerarGUI {
         for (int i = 1; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
             if (aux[0].equals("boolean")) {
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(" + nomeDaClasseminusculo + "Entidade" + ".is" + aux[1] + "));\n");
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(" + nomeDaClasseminusculo + "Entidade" + ".is" + primeiraLetramaiscula(aux[1]) + "()));\n");
             } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
                 codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(String.valueOf(" + nomeDaClasseminusculo + "Entidade" + ".get" + primeiraLetramaiscula(aux[1])
                         + "()" + "));\n");
@@ -335,11 +345,16 @@ public class GerarGUI {
                 + "btAlterar.setVisible(true);\n"
                 + "btExcluir.setVisible(true);\n"
                 + "texto.setText(\"Encontrou na Lista - pode Alterar ou Excluir\\n\\n\\n\");\n");
-        for (int i = 1; i < atributo.size(); i++) {
+        for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);");
-        }
+            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date") ) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            } else {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);\n");
 
+            }
+        }
         codigo.add("}}}});");
 
         //botão adicionar
@@ -359,11 +374,14 @@ public class GerarGUI {
                 + "\n"
                 + "btAdicionar.setVisible(false);\n"
                 + "texto.setText(\"Preencha os atributos\\n\\n\\n\\n\\n\");//limpa o campo texto\n");
-        for (int i = 1; i < atributo.size(); i++) {
+        for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
-            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);");
+            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date") ) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            } else {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(false);\n");
+
             }
         }
         codigo.add("}});");
@@ -383,11 +401,14 @@ public class GerarGUI {
                 + "btAlterar.setVisible(false);\n"
                 + "btExcluir.setVisible(false);\n"
                 + "texto.setText(\"Preencha os atributos\\n\\n\\n\\n\\n\");\n");
-        for (int i = 1; i < atributo.size(); i++) {
+     for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
-            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);");
+            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date") ) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            } else {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(false);\n");
+
             }
         }
         codigo.add("}\n"
@@ -403,19 +424,24 @@ public class GerarGUI {
                 + "tf" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + ".setEditable(true);\n");
         for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
-            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
+            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date") ) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            } else {
                 codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);\n");
+
             }
         }
         codigo.add("tf" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + ".requestFocus();\n"
                 + "tf" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + ".selectAll();\n"
                 + "texto.setText(\"Cancelou\\n\\n\\n\\n\\n\");\n");
-        for (int i = 1; i < atributo.size(); i++) {
+        for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
-            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(false);");
+            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date") ) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+
             }
         }
         codigo.add("}\n"
@@ -469,19 +495,23 @@ public class GerarGUI {
                 + "tf" + pk + ".setEditable(true);\n");
         for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
-            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
+            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date") ) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else {
                 codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+
             }
         }
         codigo.add("tf" + pk + ".requestFocus();\n"
                 + "tf" + pk + ".selectAll();\n");
-        for (int i = 1; i < atributo.size(); i++) {
+        for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
-            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);");
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);");
+            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date") ) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(false);\n");
+
             }
         }
         codigo.add("}\n"
@@ -501,12 +531,14 @@ public class GerarGUI {
                 + "btBuscar.setVisible(true);\n"
                 + "btListar.setVisible(true);\n"
                 + "tf" + pk + ".setEditable(true);\n");
-        for (int i = 1; i < atributo.size(); i++) {
+        for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
-            if ((aux[0].equals("boolean")) || (aux[0].equals("Boolean"))) {
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);");
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);");
+            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date") ) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);\n");
+
             }
         }
 
@@ -575,7 +607,7 @@ public class GerarGUI {
 
         ManipulaArquivo manipulaArquivo = new ManipulaArquivo();
 
-        manipulaArquivo.salvarArquivo("C:/Users/jvmor/Documents/NetBeansProjects/Cobaia/src/Main/AtletaGUI.java", codigo);
+        manipulaArquivo.salvarArquivo("C:/Users/jvmor/Documents/NetBeansProjects/Cobaia/src/Main/"+ nomeDaClasse +"GUI.java", codigo);
 
     }
 
