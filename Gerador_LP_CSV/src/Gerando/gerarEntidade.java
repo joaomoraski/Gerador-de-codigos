@@ -7,23 +7,27 @@ import tools.ManipulaArquivo;
 
 public class gerarEntidade {
     
-    String nomeDaClasse = "Trabalhador";
-    String nomeDaClasseminusculo = "trabalhador";
+
+    String nomeDaClasse = "Produto";
+    String nomeDaClasseminusculo = "produto";
     List<String> atributo = new ArrayList<>();
     List<String> codigo = new ArrayList<>();
     List<String> codigocontrole = new ArrayList<>();
-    
-    public String primeiraLetramaiscula(String s){
-       return String.valueOf(s.charAt(0)).toUpperCase() + s.substring(1,s.length());
-    }
-    
-    public gerarEntidade(){
-        //Gerando a classe
-        atributo.add("String;cpf");
-        atributo.add("String;nome");
-        atributo.add("double;salario");
-        atributo.add("boolean;aposentado");
 
+    public String primeiraLetramaiscula(String s) {
+        return String.valueOf(s.charAt(0)).toUpperCase() + s.substring(1, s.length());
+    }
+
+    public gerarEntidade() {
+        atributo.add("long;idProduto");
+        atributo.add("double;precoUnitario");
+        atributo.add("Date;dataDeCadastro");
+
+        //atributo.add("boolean;aposentado");
+        //atributo.add("Date;data");
+        //primeira letra maiscula
+        String pk = "idProduto"; //indique qual atributo é chave primaria 
+        String pkt = "long"; //indique qual é o tipo da váriavel pk 
         String get = "get";
         String set = "set";
 
@@ -87,17 +91,31 @@ public class gerarEntidade {
        
         
         codigo.add("@Override \n");
-        codigo.add("public String toString() {");
+        codigo.add("public String toString() {\n");
  
-        String s1 = " ";
+        
+        
+        /*        
+        String a = "public " + nomeDaClasse + " (";
         for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            String s = "\""+aux[1]+"=\""+" + "+aux[1]+" + ";
-            s1=s1+s;
-                }
-            codigo.add("return "+"\""+nomeDaClasse+"{\""+"+"+s1+"\"}\";");
-            codigo.add("}");
+            String c = aux[0] + " " + aux[1] + ", ";
+        a=a+c;
+        }
         
+        a=a.substring(0,a.length()-2);
+        codigo.add(a+") { ");*/
+        String campos = "";
+        String acampos = "";
+        codigo.add("\treturn ");
+        for (int i = 0; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            campos = aux[1] + "+ \";\" +";
+            acampos=acampos+campos;
+        }
+        
+        acampos = acampos.substring(0, acampos.length()-1);
+        codigo.add(acampos + ";}\n");
         
         //finalizar o codigo
         codigo.add("}");

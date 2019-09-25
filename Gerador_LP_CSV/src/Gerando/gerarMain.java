@@ -7,8 +7,8 @@ import tools.ManipulaArquivo;
 public class gerarMain {
 
     String nomeDaClasse = "Main";
-    String nomeDaClasseGUI = "Trabalhador";
-    String nomeDaClasseminusculo = "atleta";
+    String nomeDaClasseGUI = "Produto";
+    String nomeDaClasseminusculo = "produto";
     List<String> atributo = new ArrayList<>();
     List<String> codigo = new ArrayList<>();
     List<String> codigocontrole = new ArrayList<>();

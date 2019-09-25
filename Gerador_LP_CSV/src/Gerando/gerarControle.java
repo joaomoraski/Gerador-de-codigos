@@ -7,24 +7,30 @@ import tools.ManipulaArquivo;
 
 public class gerarControle {
     
-    String nomeDaClasse = "Trabalhador";
-    String nomeDaClasseminusculo = "trabalhador";
+    
+    String nomeDaClasse = "Produto";
+    String nomeDaClasseminusculo = "produto";
     List<String> atributo = new ArrayList<>();
     List<String> codigo = new ArrayList<>();
-    
-    public String primeiraLetramaiscula(String s){
-       return String.valueOf(s.charAt(0)).toUpperCase() + s.substring(1,s.length());
-    }
-    
-    public gerarControle(){
-        //Gerando a classe
-        atributo.add("String;cpf");
-        atributo.add("String;nome");
-        atributo.add("double;salario");
-        atributo.add("boolean;aposentado");
+    List<String> codigocontrole = new ArrayList<>();
 
+    public String primeiraLetramaiscula(String s) {
+        return String.valueOf(s.charAt(0)).toUpperCase() + s.substring(1, s.length());
+    }
+
+    public gerarControle() {
+        atributo.add("long;idProduto");
+        atributo.add("double;precoUnitario");
+        atributo.add("Date;dataDeCadastro");
+
+        //atributo.add("boolean;aposentado");
+        //atributo.add("Date;data");
+        //primeira letra maiscula
+        String pk = "idProduto"; //indique qual atributo é chave primaria 
+        String pkt = "long"; //indique qual é o tipo da váriavel pk 
         String get = "get";
         String set = "set";
+
        
         //nomeDaClasseminusculo = nomeDaClasse.toLowerCase();
         
