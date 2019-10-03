@@ -41,13 +41,18 @@ public class GerarGUI {
                 + "import java.awt.event.WindowEvent;\n"
                 + "import java.util.ArrayList;\n"
                 + "import java.util.List;\n"
+                + "import java.util.logging.Level;\n" 
+                + "import java.util.logging.Logger;\n" 
+                + "import java.text.ParseException;\n"
                 + "import java.sql.Date;\n"
                 + "import javax.swing.JButton;\n"
+                + "import java.text.SimpleDateFormat;\n"
                 + "import javax.swing.JCheckBox;\n"
                 + "import javax.swing.JFrame;\n"
                 + "import javax.swing.JLabel;\n"
                 + "import javax.swing.JOptionPane;\n"
                 + "import javax.swing.JPanel;\n"
+                + "import tools.DateTextField;\n"
                 + "import javax.swing.JScrollPane;\n"
                 + "import javax.swing.JTable;\n"
                 + "import javax.swing.JTextArea;\n"
@@ -234,6 +239,7 @@ public class GerarGUI {
                 + "List<String> listaStringCsv = manipulaArquivo.abrirArquivo(caminhoENomeDoArquivo);\n"
                 + "for (String linha : listaStringCsv) {\n"
                 + "aux = linha.split(\";\");\n"
+                + "SimpleDateFormat formato = new SimpleDateFormat(\"dd/MM/yyyy\");"
                 + "ce = new " + nomeDaClasse + " (");
         int auc = -1;
         String as = " ";
@@ -258,6 +264,9 @@ public class GerarGUI {
             } else if (aux[0].equals("Date") || (aux[0].equals("DateTextField") || (aux[0].equals("date")))) {
                 String s = "Date.valueOf(aux[" + auc + "]), ";
                 as = as + s;
+            } else if (aux[0].equals("Float") || (aux[0].equals("float"))) {
+                String s = "Float.valueOf(aux[" + auc + "]),";
+                as = as +s;
             }
         }
 
@@ -302,42 +311,54 @@ public class GerarGUI {
                 + "chavePrimaria = tf" + primeiraLetramaiscula(pk) + ".getText();\n"
                 + nomeDaClasseminusculo + "Entidade" + " = " + nomeDaClasseminusculo + "Controle.buscar(");
         if ((pkt.equals("int")) || (pkt.equals("Int"))) {
-            codigo.add("Integer.valueOf(");
+            codigo.add("Integer.valueOf(tf" + primeiraLetramaiscula(pk) + ".getText()));\n");
         } else if (pkt.equals("Double") || (pkt.equals("double"))) {
-            codigo.add("Double.valueOf(");
+            codigo.add("Double.valueOf(tf" + primeiraLetramaiscula(pk) + ".getText()));\n");
         } else if (pkt.equals("Boolean") || (pkt.equals("boolean"))) {
-            codigo.add("Boolean.valueOf(");
+            codigo.add("Boolean.valueOf(tf" + primeiraLetramaiscula(pk) + ".getText()));\n");
         } else if (pkt.equals("Long") || (pkt.equals("long"))) {
-            codigo.add("Long.valueOf(");
+            codigo.add("Long.valueOf(tf" + primeiraLetramaiscula(pk) + ".getText()));\n");
+        } else if (pkt.equals("Float") || (pkt.equals("float"))) {
+            codigo.add("Float.valueOf(tf" + primeiraLetramaiscula(pk) + ".getText()));\n");
         }
 
         codigo.add(
-                "tf" + primeiraLetramaiscula(pk) + ".getText());\n"
-                + "if (" + nomeDaClasseminusculo + "Entidade" + "== null) {\n"
+                "if (" + nomeDaClasseminusculo + "Entidade" + "== null) {\n"
                 + "btAdicionar.setVisible(true);\n"
                 + "btAlterar.setVisible(false);\n"
                 + "btExcluir.setVisible(false);\n");
-        for (int i = 0; i < atributo.size(); i++) {
+        for (int i = 1; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            if (aux[0].equals("boolean") || aux[0].equals("Boolean")) {
+            if (aux[0].equals("boolean") || (aux[0].equals("Boolean"))) {
                 codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+            } else if (aux[0].equals("Long") || aux[0].equals("long")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
             } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
                 codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
-                //codigo.add("SimpleDateFormat sdf = new SimpleDateFormat(\"dd/MM/yyyy\");\n");
-            } else if (!aux[0].equals("boolean") || !aux[0].equals("DateTextField") || !aux[0].equals("Date")) {
+            } else if (aux[0].equals("double") || aux[0].equals("Double")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else if (aux[0].equals("int") || aux[0].equals("Int")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else if (aux[0].equals("Float") || aux[0].equals("float")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else {
                 codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
             }
         }
-
         codigo.add(
                 "texto.setText(\"Não encontrou na lista - pode Adicionar\\n\\n\\n\");\n"
                 + "}\n"
                 + "else "
-                + "{\n");
+                + "{//encontrou"
+                + " \n"
+                + "SimpleDateFormat formato = new SimpleDateFormat(\"dd/MM/yyyy\");\n");
         for (int i = 1; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
             if (aux[0].equals("boolean") || (aux[0].equals("Boolean"))) {
                 codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(" + nomeDaClasseminusculo + "Entidade" + ".is" + primeiraLetramaiscula(aux[1]) + "()));\n");
+            } else if (aux[0].equals("Long") || aux[0].equals("long")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(String.valueOf(" + nomeDaClasseminusculo + "Entidade"
+                        + ".get" + primeiraLetramaiscula(aux[1]) + "()));\n");
             } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
                 codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(String.valueOf(" + nomeDaClasseminusculo + "Entidade" + ".get" + primeiraLetramaiscula(aux[1])
                         + "()" + "));\n");
@@ -348,11 +369,10 @@ public class GerarGUI {
             } else if (aux[0].equals("int") || aux[0].equals("Int")) {
                 codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(String.valueOf(" + nomeDaClasseminusculo + "Entidade"
                         + ".get" + primeiraLetramaiscula(aux[1]) + "()));\n");
-            } else if (aux[0].equals("Long") || aux[0].equals("long")) {
+            } else if (aux[0].equals("Float") || aux[0].equals("float")) {
                 codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(String.valueOf(" + nomeDaClasseminusculo + "Entidade"
                         + ".get" + primeiraLetramaiscula(aux[1]) + "()));\n");
-            }
-            else {
+            } else {
                 codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText("
                         + nomeDaClasseminusculo + "Entidade.get" + primeiraLetramaiscula(aux[1]) + "());");
             }
@@ -363,16 +383,22 @@ public class GerarGUI {
                 + "btAlterar.setVisible(true);\n"
                 + "btExcluir.setVisible(true);\n"
                 + "texto.setText(\"Encontrou na Lista - pode Alterar ou Excluir\\n\\n\\n\");\n");
-        for (int i = 0;
-                i < atributo.size();
-                i++) {
+        for (int i = 1; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date")) {
-                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            if (aux[0].equals("boolean") || (aux[0].equals("Boolean"))) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(false);\n");
+            } else if (aux[0].equals("Long") || aux[0].equals("long")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else if (aux[0].equals("double") || aux[0].equals("Double")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else if (aux[0].equals("int") || aux[0].equals("Int")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else if (aux[0].equals("float") || aux[0].equals("Float")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
             } else {
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);\n");
-
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
             }
         }
 
@@ -397,16 +423,22 @@ public class GerarGUI {
                 + "\n"
                 + "btAdicionar.setVisible(false);\n"
                 + "texto.setText(\"Preencha os atributos\\n\\n\\n\\n\\n\");//limpa o campo texto\n");
-        for (int i = 0;
-                i < atributo.size();
-                i++) {
+        for (int i = 1; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date")) {
+            if (aux[0].equals("boolean") || (aux[0].equals("Boolean"))) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);\n");
+            } else if (aux[0].equals("Long") || aux[0].equals("long")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            } else if (aux[0].equals("double") || aux[0].equals("Double")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            } else if (aux[0].equals("int") || aux[0].equals("Int")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            } else if (aux[0].equals("Float") || aux[0].equals("float")) {
                 codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
             } else {
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(false);\n");
-
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
             }
         }
 
@@ -419,8 +451,10 @@ public class GerarGUI {
                 + "@Override\n"
                 + "public void actionPerformed(ActionEvent e) {\n"
                 + "acao = \"alterar\";\n"
-                + "tf" + pk + ".setText(chavePrimaria);\n"
-                + "tf" + pk + ".setEditable(false);\n"
+                + "SimpleDateFormat formato = new SimpleDateFormat(\"dd/MM/yyyy\");\n"
+                + "SimpleDateFormat sdfEua = new SimpleDateFormat(\"yyyy-MM-dd\");"
+                + "tf" + primeiraLetramaiscula(pk) + ".setText(chavePrimaria);\n"
+                + "tf" + primeiraLetramaiscula(pk) + ".setEditable(false);\n"
                 + "tf" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + ".requestFocus();\n"
                 + "btSalvar.setVisible(true);\n"
                 + "btCancelar.setVisible(true);\n"
@@ -429,16 +463,22 @@ public class GerarGUI {
                 + "btAlterar.setVisible(false);\n"
                 + "btExcluir.setVisible(false);\n"
                 + "texto.setText(\"Preencha os atributos\\n\\n\\n\\n\\n\");\n");
-        for (int i = 0;
-                i < atributo.size();
-                i++) {
+        for (int i = 1; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date")) {
+            if (aux[0].equals("boolean") || (aux[0].equals("Boolean"))) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);\n");
+            } else if (aux[0].equals("Long") || aux[0].equals("long")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            } else if (aux[0].equals("double") || aux[0].equals("Double")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            } else if (aux[0].equals("int") || aux[0].equals("Int")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
+            } else if (aux[0].equals("float") || aux[0].equals("Float")) {
                 codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
             } else {
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(false);\n");
-
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
             }
         }
 
@@ -454,17 +494,23 @@ public class GerarGUI {
                 + "btCancelar.setVisible(false);\n"
                 + "btBuscar.setVisible(true);\n"
                 + "btListar.setVisible(true);\n"
-                + "tf" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + ".setEditable(true);\n");
-        for (int i = 0;
-                i < atributo.size();
-                i++) {
+                + "tf" + primeiraLetramaiscula(pk) + ".setEditable(true);\n");
+        for (int i = 1; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date")) {
-                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(true);\n");
-            } else {
+            if (aux[0].equals("boolean") || (aux[0].equals("Boolean"))) {
                 codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);\n");
-
+            } else if (aux[0].equals("Long") || aux[0].equals("long")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else if (aux[0].equals("double") || aux[0].equals("Double")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else if (aux[0].equals("int") || aux[0].equals("Int")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else if (aux[0].equals("Float") || aux[0].equals("float")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
             }
         }
 
@@ -472,15 +518,22 @@ public class GerarGUI {
                 "tf" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + ".requestFocus();\n"
                 + "tf" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + ".selectAll();\n"
                 + "texto.setText(\"Cancelou\\n\\n\\n\\n\\n\");\n");
-        for (int i = 0;
-                i < atributo.size();
-                i++) {
+        for (int i = 1; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date")) {
-                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
-            } else {
+            if (aux[0].equals("boolean") || (aux[0].equals("Boolean"))) {
                 codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
-
+            } else if (aux[0].equals("Long") || aux[0].equals("long")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else if (aux[0].equals("double") || aux[0].equals("Double")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else if (aux[0].equals("int") || aux[0].equals("Int")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else if (aux[0].equals("float") || aux[0].equals("Float")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
             }
         }
 
@@ -488,12 +541,16 @@ public class GerarGUI {
                 "}\n"
                 + "});");
 
+        codigo.add("SimpleDateFormat formato = new SimpleDateFormat(\"dd/MM/yyyy\");\n" 
+                + "SimpleDateFormat sdfEua = new SimpleDateFormat(\"yyyy-MM-dd\");");
+        
         //botão salvar
         codigo.add(
                 "btSalvar.addActionListener(new ActionListener() {\n"
                 + "@Override\n"
                 + "public void actionPerformed(ActionEvent e) {\n"
                 + "if (acao.equals(\"alterar\")) {\n"
+                
                 + nomeDaClasse + " " + nomeDaClasseminusculo + "Antigo = " + nomeDaClasseminusculo + "Entidade" + ";\n");
 
         for (int i = 1;
@@ -502,10 +559,20 @@ public class GerarGUI {
             String aux[] = atributo.get(i).split(";");
             if (aux[0].equals("String") || (aux[0].equals("string"))) {
                 codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(tf" + primeiraLetramaiscula(aux[1]) + ".getText());\n");
+            } else if (aux[0].equals("Long") || (aux[0].equals("long"))) {
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(Long.valueOf(tf" + primeiraLetramaiscula(aux[1]) + ".getText()));\n");
             } else if (aux[0].equals("Double") || (aux[0].equals("double"))) {
                 codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(Double.valueOf(tf" + primeiraLetramaiscula(aux[1]) + ".getText()));\n");
             } else if (aux[0].equals("Boolean") || (aux[0].equals("boolean"))) {
                 codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(cb" + primeiraLetramaiscula(aux[1]) + ".isSelected());\n");
+            } else if (aux[0].equals("float") || (aux[0].equals("Float"))) {
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(Float.valueOf(tf" + primeiraLetramaiscula(aux[1]) + ".getText()));\n");
+            } else if (aux[0].equals("Date") || (aux[0].equals("date"))) {
+                codigo.add("try{\n");
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) +"(Date.valueOf(sdfEua.format(formato.parse(tf" + primeiraLetramaiscula(aux[1]) + ".getText()))));");
+                codigo.add("} catch (ParseException ex) {\n"
+                        + "Logger.getLogger(ProdutoGUI.class.getName()).log(Level.SEVERE, null, ex);\n"
+                        + "}");
             }
         }
 
@@ -520,9 +587,24 @@ public class GerarGUI {
             String aux[] = atributo.get(i).split(";");
             if (aux[1].equals(pk)) {
                 if (aux[0].equals("int")) {
-                    codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + pk + "(Integer.valueOf((tf" + pk + ".getText())));\n");
-                } else {
-                    codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + pk + "(tf" + pk + ".getText());\n");
+                    codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(pk) + "(Integer.valueOf((tf" + primeiraLetramaiscula(pk) + ".getText())));\n");
+                } else if (aux[0].equals("String") || (aux[0].equals("string"))) {
+                    codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(pk) + "(String.valueOf(tf" + primeiraLetramaiscula(pk) + ".getText()));\n");
+
+                } else if (aux[0].equals("long") || (aux[0].equals("Long"))) {
+                    codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(pk) + "(Long.valueOf(tf" + primeiraLetramaiscula(pk) + ".getText()));\n");
+
+                } else if (aux[0].equals("Double") || (aux[0].equals("double"))) {
+                    codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(pk) + "(Double.valueOf(tf" + primeiraLetramaiscula(pk) + ".getText()));\n");
+
+                } else if (aux[0].equals("Date") || (aux[0].equals("date"))) {
+                    codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(pk) + "(Date.valueOf(tf" + primeiraLetramaiscula(pk) + ".getText()));\n");
+
+                } else if (aux[0].equals("Float") || (aux[0].equals("float"))) {
+                    codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(pk) + "(Float.valueOf(tf" + primeiraLetramaiscula(pk) + ".getText()));\n");
+
+                } else if (aux[0].equals("Boolean") || (aux[0].equals("boolean"))) {
+                    codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(pk) + "(cb" + primeiraLetramaiscula(pk) + ".isSelected());\n");
                 }
             } else if (aux[0].equals("String") || (aux[0].equals("string"))) {
                 codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(tf" + primeiraLetramaiscula(aux[1]) + ".getText());\n");
@@ -532,6 +614,16 @@ public class GerarGUI {
                 codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(Integer.valueOf((tf" + primeiraLetramaiscula(aux[1]) + ".getText())));\n");
             } else if (aux[0].equals("Boolean") || (aux[0].equals("boolean"))) {
                 codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(cb" + primeiraLetramaiscula(aux[1]) + ".isSelected());\n");
+            } else if (aux[0].equals("Long") || (aux[0].equals("long"))) {
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(Float.valueOf(tf" + primeiraLetramaiscula(aux[1]) + ".getText()));\n");
+            } else if (aux[0].equals("Float") || (aux[0].equals("float"))) {
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) + "(Long.valueOf(tf" + primeiraLetramaiscula(aux[1]) + ".getText()));\n");
+            } else if (aux[0].equals("Date") || (aux[0].equals("date"))) {
+                codigo.add("try{\n");
+                codigo.add(nomeDaClasseminusculo + "Entidade" + ".set" + primeiraLetramaiscula(aux[1]) +"(Date.valueOf(sdfEua.format(formato.parse(tf" + primeiraLetramaiscula(aux[1]) + ".getText()))));");
+                codigo.add("} catch (ParseException ex) {\n"
+                        + "Logger.getLogger(ProdutoGUI.class.getName()).log(Level.SEVERE, null, ex);\n"
+                        + "}");
             }
         }
 
@@ -542,32 +634,41 @@ public class GerarGUI {
                 + "btCancelar.setVisible(false);\n"
                 + "btBuscar.setVisible(true);\n"
                 + "btListar.setVisible(true);\n"
-                + "tf" + pk + ".setEditable(true);\n");
-        for (int i = 0;
-                i < atributo.size();
-                i++) {
+                + "tf" + primeiraLetramaiscula(pk) + ".setEditable(true);\n");
+        for (int i = 1; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date")) {
-                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
-            } else {
+            if (aux[0].equals("boolean") || (aux[0].equals("Boolean"))) {
                 codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
-
+            } else if (aux[0].equals("Long") || aux[0].equals("long")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");                //codigo.add("SimpleDateFormat sdf = new SimpleDateFormat(\"dd/MM/yyyy\");\n");
+            } else if (aux[0].equals("double") || aux[0].equals("Double")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else if (aux[0].equals("int") || aux[0].equals("Int")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else if (aux[0].equals("Float") || aux[0].equals("float")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
             }
         }
-
         codigo.add(
-                "tf" + pk + ".requestFocus();\n"
-                + "tf" + pk + ".selectAll();\n");
-        for (int i = 0;
-                i < atributo.size();
-                i++) {
-            String aux[] = atributo.get(i).split(";");
-            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date")) {
-                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
-            } else {
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(false);\n");
+                "tf" + primeiraLetramaiscula(pk) + ".requestFocus();\n"
+                + "tf" + primeiraLetramaiscula(pk) + ".selectAll();\n");
 
+        for (int i = 1; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            if (aux[0].equals("boolean") || (aux[0].equals("Boolean"))) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);\n");
+            } else if (aux[0].equals("Long") || aux[0].equals("long")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else if (aux[0].equals("double") || aux[0].equals("Double")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else if (aux[0].equals("int") || aux[0].equals("Int")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
+            } else {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
             }
         }
 
@@ -580,7 +681,7 @@ public class GerarGUI {
                 "btExcluir.addActionListener(new ActionListener() {\n"
                 + "@Override\n"
                 + "public void actionPerformed(ActionEvent e) {\n"
-                + "tf" + pk + ".setText(chavePrimaria);//para retornar ao valor original (caso o usuário mude e tente enganar o programa)\n"
+                + "tf" + primeiraLetramaiscula(pk) + ".setText(chavePrimaria);//para retornar ao valor original (caso o usuário mude e tente enganar o programa)\n"
                 + "if (JOptionPane.YES_OPTION\n"
                 + "== JOptionPane.showConfirmDialog(null,\n"
                 + "\"Confirma a exclusão do registro <Nome = \" + " + nomeDaClasseminusculo + "Entidade" + ".get" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + "() +  \">?\", \"Confirm\",\n"
@@ -589,26 +690,32 @@ public class GerarGUI {
                 + "}\n"
                 + "btBuscar.setVisible(true);\n"
                 + "btListar.setVisible(true);\n"
-                + "tf" + pk + ".setEditable(true);\n");
-        for (int i = 0;
-                i < atributo.size();
-                i++) {
-            String aux[] = atributo.get(i).split(";");
-            if (aux[0].equals("String") || aux[0].equals("string") || aux[0].equals("int") || aux[0].equals("Int") || aux[0].equals("Double") || aux[0].equals("double") || aux[0].equals("Date") || aux[0].equals("date")) {
-                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setEditable(false);\n");
-            } else {
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
-                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnabled(true);\n");
+                + "tf" + primeiraLetramaiscula(pk) + ".setEditable(true);\n");
 
+        for (int i = 1; i < atributo.size(); i++) {
+            String aux[] = atributo.get(i).split(";");
+            if (aux[0].equals("boolean") || (aux[0].equals("Boolean"))) {
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setSelected(false);\n");
+                codigo.add("cb" + primeiraLetramaiscula(aux[1]) + ".setEnable(true);\n");
+            } else if (aux[0].equals("Long") || aux[0].equals("long")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else if (aux[0].equals("DateTextField") || aux[0].equals("Date")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");                //codigo.add("SimpleDateFormat sdf = new SimpleDateFormat(\"dd/MM/yyyy\");\n");
+            } else if (aux[0].equals("double") || aux[0].equals("Double")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else if (aux[0].equals("int") || aux[0].equals("Int")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
+            } else if (aux[0].equals("float") || aux[0].equals("Float")) {
+                codigo.add("tf" + primeiraLetramaiscula(aux[1]) + ".setText(\"\");\n");
             }
         }
 
         codigo.add(
-                "tf" + pk + ".requestFocus();\n"
-                + "tf" + pk + ".selectAll();\n"
+                "tf" + primeiraLetramaiscula(pk) + ".requestFocus();\n"
+                + "tf" + primeiraLetramaiscula(pk) + ".selectAll();\n"
                 + "btExcluir.setVisible(false);\n"
                 + "btAlterar.setVisible(false);\n"
-                + "texto.setText(\"Excluiu o registro de \" + " + nomeDaClasseminusculo + "Entidade" + ".get" + pk + "() + \" - \" + "
+                + "texto.setText(\"Excluiu o registro de \" + " + nomeDaClasseminusculo + "Entidade" + ".get" + primeiraLetramaiscula(pk) + "() + \" - \" + "
                 + nomeDaClasseminusculo + "Entidade" + ".get" + primeiraLetramaiscula(atributo.get(1).split(";")[1]) + "() + \"\\n\\n\\n\\n\\n\");//limpa o campo texto\n"
                 + "}\n"
                 + "});"

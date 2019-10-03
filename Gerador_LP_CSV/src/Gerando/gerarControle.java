@@ -69,13 +69,15 @@ public class gerarControle {
         codigo.add("for (int i=0; i < lista.size(); i++)"
                 + " { \n if (lista.get(i).get" 
                 + primeiraLetramaiscula(atributo.get(0).split(";")[1]) + "()");
-                if (atributo.get(0).split(";")[0].equals("int")) {
+                if (atributo.get(0).split(";")[0].equals("int") || (atributo.get(0).split(";")[0].equals("Int"))) {
                     codigo.add(" == (");
-                }else if (atributo.get(0).split(";")[0].equals("String")){
+                }else if (atributo.get(0).split(";")[0].equals("String") || (atributo.get(0).split(";")[0].equals("string"))){
                     codigo.add(".equals(");
-                }else if (atributo.get(0).split(";")[0].equals("double")){
+                }else if (atributo.get(0).split(";")[0].equals("double") || (atributo.get(0).split(";")[0].equals("Double"))){
                     codigo.add(" == (");
-                } 
+                }else if(atributo.get(0).split(";")[0].equals("long") || (atributo.get(0).split(";")[0].equals("Long"))){
+                    codigo.add(" == (");
+                }  
                 codigo.add(atributo.get(0).split(";")[1]
                         +")) {");
         

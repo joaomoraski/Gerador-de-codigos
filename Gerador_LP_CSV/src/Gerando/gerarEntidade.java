@@ -1,4 +1,3 @@
-
 package Gerando;
 
 import java.util.ArrayList;
@@ -6,7 +5,6 @@ import java.util.List;
 import tools.ManipulaArquivo;
 
 public class gerarEntidade {
-    
 
     String nomeDaClasse = "Produto";
     String nomeDaClasseminusculo = "produto";
@@ -44,22 +42,20 @@ public class gerarEntidade {
                 + " public " + nomeDaClasse + "() {\n"
                 + "    }\n");
 
-       
         String a = "public " + nomeDaClasse + " (";
         for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
             String c = aux[0] + " " + aux[1] + ", ";
-        a=a+c;
+            a = a + c;
         }
-        
-        a=a.substring(0,a.length()-2);
-        codigo.add(a+") { ");
-        
-        
+
+        a = a.substring(0, a.length() - 2);
+        codigo.add(a + ") { ");
+
         for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
             codigo.add("this." + aux[1] + "= " + aux[1] + ";\n");
-        
+
         }
         codigo.add("}\n\n");
         /*codigo.add(""
@@ -68,66 +64,49 @@ public class gerarEntidade {
                 + "this.altura = altura;\n"
                 + "this.esporte = esporte;\n" 
                 + "}\n");        
-*/
+         */
         for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
             if (aux[0].equals("boolean") || aux[0].equals("Boolean")) {
-                codigo.add("public "+ aux[0] + " is"+ primeiraLetramaiscula(aux[1])+"(){\nreturn "+aux[1]+";\n }");
+                codigo.add("public " + aux[0] + " is" + primeiraLetramaiscula(aux[1]) + "(){\nreturn " + aux[1] + ";\n }");
             }
-            codigo.add("public "+aux[0] +" get"+primeiraLetramaiscula(aux[1])+"(){\nreturn "+aux[1]+";\n }");
+            codigo.add("public " + aux[0] + " get" + primeiraLetramaiscula(aux[1]) + "(){\nreturn " + aux[1] + ";\n }");
             codigo.add("public void"
-                    +" set"
-                    +primeiraLetramaiscula(aux[1])
-                    +"("+aux[0]
-                    +"  "+aux[1]
-                    +"){\n this."
-                    +aux[1]
-                    +" = "
-                    +aux[1]+";\n }");
-         }
-        
-        
-        
-       
-        
+                    + " set"
+                    + primeiraLetramaiscula(aux[1])
+                    + "(" + aux[0]
+                    + "  " + aux[1]
+                    + "){\n this."
+                    + aux[1]
+                    + " = "
+                    + aux[1] + ";\n }");
+        }
+
         codigo.add("@Override \n");
         codigo.add("public String toString() {\n");
- 
+
         
-        
-        /*        
-        String a = "public " + nomeDaClasse + " (";
-        for (int i = 0; i < atributo.size(); i++) {
-            String aux[] = atributo.get(i).split(";");
-            String c = aux[0] + " " + aux[1] + ", ";
-        a=a+c;
-        }
-        
-        a=a.substring(0,a.length()-2);
-        codigo.add(a+") { ");*/
         String campos = "";
         String acampos = "";
         codigo.add("\treturn ");
         for (int i = 0; i < atributo.size(); i++) {
             String aux[] = atributo.get(i).split(";");
-            campos = aux[1] + "+ \";\" +";
-            acampos=acampos+campos;
-        }
-        
-        acampos = acampos.substring(0, acampos.length()-1);
+                campos = aux[1] + "+ \";\" +";
+                acampos = acampos + campos;
+            }
+
+        acampos = acampos.substring(0, acampos.length() - 1);
         codigo.add(acampos + ";}\n");
-        
+
         //finalizar o codigo
         codigo.add("}");
-    
+
         for (int i = 0; i < codigo.size(); i++) {
-        System.out.println(codigo.get(i));
+            System.out.println(codigo.get(i));
         }
-        
+
         ManipulaArquivo manipulaArquivo = new ManipulaArquivo();
         manipulaArquivo.salvarArquivo("C:/Users/jvmor/Documents/NetBeansProjects/Cobaia/src/Main/" + nomeDaClasse + ".java", codigo);
     }
-    
-
 
 };
